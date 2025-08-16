@@ -11,7 +11,9 @@ namespace Vorp
         {
             if (args.Length > 0)
             {
-                String filePath = args[0];
+                String filePath = args[0] == "-i" ? args[1] : args[0];
+                bool ignoreCase = args[0] == "-i";
+                String targetString = args[0] == "-i" ? args[2] : args[1];
 
                 try
                 {
@@ -28,12 +30,22 @@ namespace Vorp
                             UTF8Encoding utf8 = new UTF8Encoding();
                             byte[] buffer = new byte[bufferSize];
                             int bytesReaded;
+                            String currentLine = "";
                             while ((bytesReaded = fs.Read(buffer, 0, buffer.Length)) > 0)
                             {
-                                String decodedText = utf8.GetString(buffer, 0, bytesReaded);
-                                Console.Write(decodedText);
+                                int indexOfNewline = Array.IndexOf(buffer, 0x0A, 0, bytesReaded);
+
+                                if (indexOfNewline != -1)
+                                {
+                                    currentLine += utf8.GetString(buffer, 0, indexOfNewline);
+                                    WriteFoundLines(currentLine, targetString, ignoreCase);
+                                    currentLine = "";
+                                }
+                                else
+                                {
+                                    currentLine += utf8.GetString(buffer, 0, bytesReaded);
+                                }
                             }
-                            Console.WriteLine();
                         }
                     }
                     else
@@ -66,6 +78,30 @@ namespace Vorp
             else // Larger than 1 mB
             {
                 return 64 * 1024;
+            }
+        }
+
+        static void WriteFoundLines(String line, String targetString, bool ignoreCase)
+        {
+            if (ignoreCase)
+            {
+                String lineLower = line.ToLower();
+                String targetLower = targetString.ToLower();
+                bool found = lineLower.Contains(targetLower);
+
+                if (found)
+                {
+                    Console.WriteLine(line);
+                }
+            }
+            else
+            {
+                bool found = line.Contains(targetString);
+
+                if (found)
+                {
+                    Console.WriteLine(line);
+                }
             }
         }
     }
