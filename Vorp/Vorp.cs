@@ -19,32 +19,13 @@ namespace Vorp
                 {
                     if (!Directory.Exists(filePath))
                     {
-                        FileInfo fileInfo = new FileInfo(filePath); // Getting file's info. Especially file's Length in bytes for dynamic buffer size.
-                        long fileSize = fileInfo.Length;
+                        String line;
 
-                        int bufferSize = GetBufferSize(fileSize);
-
-                        using (FileStream fs = new FileStream(filePath,
-                            FileMode.Open, FileAccess.Read))
+                        using (StreamReader sr = new StreamReader(filePath))
                         {
-                            UTF8Encoding utf8 = new UTF8Encoding();
-                            byte[] buffer = new byte[bufferSize];
-                            int bytesReaded;
-                            String currentLine = "";
-                            while ((bytesReaded = fs.Read(buffer, 0, buffer.Length)) > 0)
+                            for (int i = 1; (line = sr.ReadLine()) != null; i++)
                             {
-                                int indexOfNewline = Array.IndexOf(buffer, 0x0A, 0, bytesReaded);
-
-                                if (indexOfNewline != -1)
-                                {
-                                    currentLine += utf8.GetString(buffer, 0, indexOfNewline);
-                                    WriteFoundLines(currentLine, targetString, ignoreCase);
-                                    currentLine = "";
-                                }
-                                else
-                                {
-                                    currentLine += utf8.GetString(buffer, 0, bytesReaded);
-                                }
+                                WriteFoundLines(line, targetString, i, ignoreCase);
                             }
                         }
                     }
@@ -64,24 +45,7 @@ namespace Vorp
             }
         }
 
-        // Dynamic buffer size for optimizing RAM usage.
-        static int GetBufferSize(long fileSize)
-        {
-            if (fileSize < 1024) // 1 kB
-            {
-                return 1024;
-            }
-            else if (fileSize < 1024 * 1024) // 1 mB
-            {
-                return 6 * 1024;
-            }
-            else // Larger than 1 mB
-            {
-                return 64 * 1024;
-            }
-        }
-
-        static void WriteFoundLines(String line, String targetString, bool ignoreCase)
+        static void WriteFoundLines(String line, String targetString, int lineIndex, bool ignoreCase)
         {
             if (ignoreCase)
             {
@@ -91,7 +55,7 @@ namespace Vorp
 
                 if (found)
                 {
-                    Console.WriteLine(line);
+                    Console.WriteLine($" {lineIndex} | {line}");
                 }
             }
             else
@@ -100,7 +64,7 @@ namespace Vorp
 
                 if (found)
                 {
-                    Console.WriteLine(line);
+                    Console.WriteLine($" {lineIndex} | {line}");
                 }
             }
         }
