@@ -15,6 +15,11 @@ namespace Vorp
                 bool ignoreCase = args[0] == "-i";
                 String targetString = args[0] == "-i" ? args[2] : args[1];
 
+                if (ignoreCase)
+                {
+                    targetString = targetString.ToLower();
+                }
+
                 try
                 {
                     if (!Directory.Exists(filePath))
@@ -50,8 +55,7 @@ namespace Vorp
             if (ignoreCase)
             {
                 String lineLower = line.ToLower();
-                String targetLower = targetString.ToLower();
-                bool found = lineLower.Contains(targetLower);
+                bool found = lineLower.Contains(targetString);
 
                 if (found)
                 {
