@@ -9,3 +9,7 @@ a 'grep' command "alternative".
 **Example**:
 
 `dotnet run -i "C:\Users\vortique\test.txt" "hello world"`
+
+### Options
+
+`-i` -> Ignores differences when checking upper and lower case letters.
